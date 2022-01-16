@@ -35,7 +35,7 @@ namespace BasicWebServer.Server.HTTP
             return new Request
             {
                 Method = method,
-                Url = url,
+                Url = url.ToLower(),
                 Headers = headers,
                 Body = body
             };

@@ -1,4 +1,7 @@
-﻿using System;
+﻿using BasicWebServer.Server.HTTP;
+using BasicWebServer.Server.Routing;
+using BasicWebServer.Server.Routing.Contracts;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -14,15 +17,28 @@ namespace BasicWebServer.Server
         private readonly int port;
         private readonly TcpListener serverListener;
 
+        private readonly RoutingTable routingTable;
 
-        public HTTPServer(string ipAddress, int port)
+        public HTTPServer(string ipAddress, int port,Action<IRoutingTable> routingTableConfiguration)
         {
             this.ipAddress = IPAddress.Parse(ipAddress);
             this.port = port;
 
             this.serverListener = new TcpListener(this.ipAddress, port);
+
+            routingTableConfiguration(this.routingTable=new RoutingTable());
         }
 
+        public HTTPServer(int port, Action<IRoutingTable> routingTable)
+            :this("127.0.0.1",port,routingTable)
+        {
+
+        }
+        public HTTPServer(Action<IRoutingTable> routingTable)
+            :this(8080,routingTable)
+        {
+
+        }
         public void Start()
         {
             this.serverListener.Start();
@@ -41,7 +57,11 @@ namespace BasicWebServer.Server
 
                 Console.WriteLine(requestText);
 
-                WriteResponse(networkStream, "Hello from the server");
+                var request=Request.Parse(requestText);
+
+                var response = this.routingTable.MatchRequest(request);
+
+                WriteResponse(networkStream, response);
 
                 connection.Close();
 
@@ -49,19 +69,11 @@ namespace BasicWebServer.Server
 
         }
 
-        private static void WriteResponse(NetworkStream networkStream, string respons)
+        private static void WriteResponse(NetworkStream networkStream, Response respons)
         {
-            var content = respons;
-            var conthentLength = Encoding.UTF8.GetByteCount(content);
+            
 
-            var resopnse = $@"HTTP/1.1 200 OK
-Content-Type: text/plain; charset=UTF-8
-Content-Length: {conthentLength}
-
-
-{content}";
-
-            var resopnseBytes = Encoding.UTF8.GetBytes(resopnse);
+            var resopnseBytes = Encoding.UTF8.GetBytes(respons.ToString());
 
             networkStream.Write(resopnseBytes);
         }
@@ -73,7 +85,7 @@ Content-Length: {conthentLength}
 
             var totalBytes = 0;
 
-            var requestBuilder=new StringBuilder();
+            var requestBuilder = new StringBuilder();
 
             do
             {
@@ -81,7 +93,7 @@ Content-Length: {conthentLength}
 
                 totalBytes += bytesRead;
 
-                if (totalBytes>10*1024)
+                if (totalBytes > 10 * 1024)
                 {
                     throw new InvalidOperationException("Request is too large");
                 }
