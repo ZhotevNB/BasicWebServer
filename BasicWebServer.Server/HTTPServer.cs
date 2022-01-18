@@ -61,6 +61,11 @@ namespace BasicWebServer.Server
 
                 var response = this.routingTable.MatchRequest(request);
 
+                if (response.PreRenderAction != null)
+                {
+                    response.PreRenderAction(request, response);
+                }
+
                 WriteResponse(networkStream, response);
 
                 connection.Close();
@@ -69,7 +74,7 @@ namespace BasicWebServer.Server
 
         }
 
-        private static void WriteResponse(NetworkStream networkStream, Response respons)
+        private void WriteResponse(NetworkStream networkStream, Response respons)
         {
             
 
