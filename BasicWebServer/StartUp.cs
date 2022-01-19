@@ -33,7 +33,8 @@ public class StartUp
        .MapPost("/HTML".ToLower(), new TextResponse("", StartUp.AddFormDataAction))
        .MapGet("/Content".ToLower(), new HtmlResponse(StartUp.DownloadForm))
        .MapPost("/Content".ToLower(), new TextFileResponse(StartUp.FileName))
-       .MapGet("/Cookies".ToLower(), new HtmlResponse("", StartUp.AddCookiesAction)));
+       .MapGet("/Cookies".ToLower(), new HtmlResponse("", StartUp.AddCookiesAction))
+       .MapGet("/Session".ToLower(), new TextResponse("",StartUp.DisplaySessionInfoAction)));
 
         await server.Start();
 
@@ -85,7 +86,7 @@ public class StartUp
     private static void AddCookiesAction(
         Request request, Response response)
     {
-        var requestHasCookies = request.Cookies.Any();
+        var requestHasCookies = request.Cookies.Any(c=>c.Name!=Session.SessionCookieName);
         var bodyText = "";
 
         if (requestHasCookies)
@@ -120,6 +121,28 @@ public class StartUp
             response.Cookies.Add("My-Cookie", "My-Value");
             response.Cookies.Add("My-Second-Cookie", "My-Second-Value");
         }
+    }
+
+    private static void DisplaySessionInfoAction
+            (Request request, Response response)
+    {
+        var sessionExists = request.Session
+            .ContainsKey(Session.SessionCurrentDataKey);
+
+        var bodyText = "";
+
+        if (sessionExists)
+        {
+            var currentDate = request.Session[Session.SessionCurrentDataKey];
+            bodyText = $"Stored date: {currentDate}!";
+        }
+        else
+        {
+            bodyText = "Current data stored!";
+        }
+        response.Body = "";
+        response.Body += bodyText;
+
     }
 }
 

@@ -67,6 +67,7 @@ namespace BasicWebServer.Server
                       {
                           response.PreRenderAction(request, response);
                       }
+                      AddSession(request, response);
 
                       await WriteResponse(networkStream, response);
 
@@ -112,5 +113,21 @@ namespace BasicWebServer.Server
 
             return requestBuilder.ToString();
         }
+
+        private static void AddSession(Request request,Response response)
+        {
+            var sessionExist=request.Session
+                .ContainsKey(Session.SessionCurrentDataKey);
+
+            if (!sessionExist)
+            {
+                request.Session[Session.SessionCurrentDataKey]
+                    = DateTime.Now.ToString();
+                response.Cookies
+                    .Add(Session.SessionCookieName, request.Session.Id);
+            }
+        }
+
+        
     }
 }
