@@ -129,7 +129,8 @@ public class StartUp
         {
             bodyText = "<h1>Cookies  set!</h1>";
         }
-        response.Body = bodyText;
+        response.Body = "";
+        response.Body += bodyText;
 
         if (!requestHasCookies)
         {
