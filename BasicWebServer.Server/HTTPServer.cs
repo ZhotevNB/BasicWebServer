@@ -19,27 +19,27 @@ namespace BasicWebServer.Server
 
         private readonly RoutingTable routingTable;
 
-        public HTTPServer(string ipAddress, int port,Action<IRoutingTable> routingTableConfiguration)
+        public HTTPServer(string ipAddress, int port, Action<IRoutingTable> routingTableConfiguration)
         {
             this.ipAddress = IPAddress.Parse(ipAddress);
             this.port = port;
 
             this.serverListener = new TcpListener(this.ipAddress, port);
 
-            routingTableConfiguration(this.routingTable=new RoutingTable());
+            routingTableConfiguration(this.routingTable = new RoutingTable());
         }
 
         public HTTPServer(int port, Action<IRoutingTable> routingTable)
-            :this("127.0.0.1",port,routingTable)
+            : this("127.0.0.1", port, routingTable)
         {
 
         }
         public HTTPServer(Action<IRoutingTable> routingTable)
-            :this(8080,routingTable)
+            : this(8080, routingTable)
         {
 
         }
-        public void Start()
+        public async Task Start()
         {
             this.serverListener.Start();
 
@@ -49,41 +49,44 @@ namespace BasicWebServer.Server
             while (true)
             {
 
-                var connection = serverListener.AcceptTcpClient();
+                var connection = await serverListener.AcceptTcpClientAsync();
 
-                var networkStream = connection.GetStream();
+                _ = Task.Run(async() =>
+                  {
+                      var networkStream = connection.GetStream();
 
-                var requestText = ReadRequest(networkStream);
+                      var requestText = await ReadRequest(networkStream);
 
-                Console.WriteLine(requestText);
+                      Console.WriteLine(requestText);
 
-                var request=Request.Parse(requestText);
+                      var request = Request.Parse(requestText);
 
-                var response = this.routingTable.MatchRequest(request);
+                      var response = this.routingTable.MatchRequest(request);
 
-                if (response.PreRenderAction != null)
-                {
-                    response.PreRenderAction(request, response);
-                }
+                      if (response.PreRenderAction != null)
+                      {
+                          response.PreRenderAction(request, response);
+                      }
 
-                WriteResponse(networkStream, response);
+                      await WriteResponse(networkStream, response);
 
-                connection.Close();
+                      connection.Close();
 
+                  });
             }
 
         }
 
-        private void WriteResponse(NetworkStream networkStream, Response respons)
+        private async Task WriteResponse(NetworkStream networkStream, Response respons)
         {
-            
+
 
             var resopnseBytes = Encoding.UTF8.GetBytes(respons.ToString());
 
-            networkStream.Write(resopnseBytes);
+            await networkStream.WriteAsync(resopnseBytes);
         }
 
-        private static string ReadRequest(NetworkStream networkStream)
+        private static async Task<string> ReadRequest(NetworkStream networkStream)
         {
             var bufferLenght = 1024;
             var buffer = new byte[bufferLenght];
@@ -94,7 +97,7 @@ namespace BasicWebServer.Server
 
             do
             {
-                var bytesRead = networkStream.Read(buffer, 0, bufferLenght);
+                var bytesRead = await networkStream.ReadAsync(buffer, 0, bufferLenght);
 
                 totalBytes += bytesRead;
 
