@@ -1,5 +1,6 @@
 ﻿using BasicWebServer.Server.HTTP;
 
+
 namespace BasicWebServer.Server.Responses.ContentResponses
 {
     public class ViewResponse : ContentResponse

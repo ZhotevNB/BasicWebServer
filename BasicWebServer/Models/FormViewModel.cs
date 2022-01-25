@@ -1,5 +1,6 @@
-﻿
-namespace BasicWebServer.Demo.Models
+﻿namespace BasicWebServer.Demo.Models
+
+
 {
     public class FormViewModel
     {

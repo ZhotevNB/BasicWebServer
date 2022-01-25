@@ -1,6 +1,5 @@
-﻿
+﻿using BasicWebServer.Server.HTTP;
 
-using BasicWebServer.Server.HTTP;
 
 namespace BasicWebServer.Server.Responses.ContentResponses
 {

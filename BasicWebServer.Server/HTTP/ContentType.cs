@@ -1,6 +1,4 @@
-﻿
-
-namespace BasicWebServer.Server.HTTP
+﻿namespace BasicWebServer.Server.HTTP
 {
     public class ContentType
     {
