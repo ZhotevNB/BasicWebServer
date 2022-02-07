@@ -1,4 +1,5 @@
 ﻿using BasicWebServer.Demo.Models;
+using BasicWebServer.Server.Attributes;
 using BasicWebServer.Server.Controllers;
 using BasicWebServer.Server.HTTP;
 using System.Text;
@@ -23,6 +24,7 @@ namespace BasicWebServer.Demo.Controllers
 
         public Response Html() => View();
 
+        [HttpPost]
         public Response HtmlFormPost()
         {
            var name =this.Request.Form["Name"];

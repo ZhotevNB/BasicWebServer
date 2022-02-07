@@ -6,19 +6,20 @@ using System.Runtime.CompilerServices;
 
 namespace BasicWebServer.Server.Controllers
 {
-    public abstract class Controller
+    public class Controller
     {
 
+        protected Request Request { get; set; }
         protected Controller(Request request)
         {
             this.Request = request;
         }
 
-        public Request Request { get; private init; }
 
         protected Response Text(string text) => new TextResponse(text);
+        protected Response Html(string text) => new HtmlResponse(text);
 
-        protected Response Html(string html, CookieCollection cookies = null)
+        protected Response Html(string html, CookieCollection cookies)
         {
             var response = new HtmlResponse(html);
 
