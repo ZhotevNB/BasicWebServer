@@ -14,10 +14,10 @@ namespace BasicWebServer.Server.Routing
         public RoutingTable() =>
             this.routes = new ()
             {
-                [Method.GET] = new (),
-                [Method.PUT] = new (),
-                [Method.POST] = new (),
-                [Method.DELETE] = new ()
+                [Method.GET] = new (StringComparer.InvariantCultureIgnoreCase),
+                [Method.PUT] = new (StringComparer.InvariantCultureIgnoreCase),
+                [Method.POST] = new (StringComparer.InvariantCultureIgnoreCase),
+                [Method.DELETE] = new (StringComparer.InvariantCultureIgnoreCase)
             };
         public IRoutingTable Map(Method method,
             string path, 
@@ -27,7 +27,7 @@ namespace BasicWebServer.Server.Routing
             Guard.AgainstNull(path,nameof(path));
             Guard.AgainstNull(responseFunction, nameof(responseFunction));
 
-            this.routes[method][path.ToLower()] = responseFunction;
+            this.routes[method][path] = responseFunction;
 
             return this;
             }

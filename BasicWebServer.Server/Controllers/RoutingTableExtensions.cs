@@ -1,6 +1,6 @@
 ﻿using BasicWebServer.Server.HTTP;
 using BasicWebServer.Server.Routing.Contracts;
-
+using System.Reflection;
 
 namespace BasicWebServer.Server.Controllers
 {
@@ -24,5 +24,15 @@ namespace BasicWebServer.Server.Controllers
         private static TController CreateController<TController>(Request request)
             => (TController)Activator
             .CreateInstance(typeof(TController), new[] { request });
+
+        private static Controller CreateController(Type controllerType,Request request)
+        {
+            var controller =(Controller)Request.ServiceCollection.CreateInstase(controllerType);
+
+            controllerType
+                .GetProperty("Request",BindingFlags.Instance | BindingFlags.NonPublic)
+                .SetValue(controller, request);
+            return controller;
+        }
     }
 }
